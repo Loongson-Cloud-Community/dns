@@ -13,15 +13,17 @@
 # limitations under the License.
 
 VERSION ?= $(shell git describe --tags --always --dirty)
-REGISTRY ?= gcr.io/k8s-staging-dns
-ARCH ?= amd64
+#REGISTRY ?= gcr.io/k8s-staging-dns
+REGISTRY ?= lcr.loongnix.cn
+ARCH ?= loong64
 DNSMASQ_VERSION ?= dnsmasq-2.87
 CONTAINER_PREFIX ?= k8s-dns
 
-ALL_ARCH := amd64 arm arm64 ppc64le s390x
+ALL_ARCH := amd64 arm arm64 ppc64le s390x loong64
 MANIFEST_IMAGE := $(REGISTRY)/$(CONTAINER_PREFIX)-dnsmasq
 IMAGE := $(CONTAINER_PREFIX)-dnsmasq-$(ARCH)
-COMPILE_IMAGE := k8s.gcr.io/kube-cross:v1.7.6-k8s1.6-0
+#COMPILE_IMAGE := k8s.gcr.io/kube-cross:v1.7.6-k8s1.6-0
+COMPILE_IMAGE := kubernetes-build-image/kube-cross:latest
 OUTPUT_DIR := _output/$(ARCH)
 
 # Ensure that the docker command line supports the manifest images
@@ -29,9 +31,12 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 
 # Multiarch image
 # Uploaded: Sep 19, 2022, 1:53:32 PM
-BASEIMAGE ?= gcr.io/distroless/base-debian11@sha256:c06bf48fa67dab06db6027109d3d802aa5b7d213c86a9eabc4d83f806d18ce1c
+#BASEIMAGE ?= gcr.io/distroless/base-debian11@sha256:c06bf48fa67dab06db6027109d3d802aa5b7d213c86a9eabc4d83f806d18ce1c
+BASEIMAGE ?= lcr.loongnix.cn/library/debian:trixie
 ifeq ($(ARCH),amd64)
 	COMPILE_IMAGE := k8s.gcr.io/build-image/debian-base-$(ARCH):bullseye-v1.4.1
+	TRIPLE    ?= x86_64-linux-gnu
+	QEMUARCH  := x86_64
 else ifeq ($(ARCH),arm)
 	TRIPLE    ?= arm-linux-gnueabihf
 	QEMUARCH  := arm
@@ -44,6 +49,9 @@ else ifeq ($(ARCH),ppc64le)
 else ifeq ($(ARCH),s390x)
 	TRIPLE    ?= s390x-linux-gnu
 	QEMUARCH  := s390x
+else ifeq ($(ARCH),loong64)
+#        TRIPLE    ?= loongarch64-linux-gnu
+#        QEMUARCH  := loongarch64
 else
 $(error Unsupported ARCH: $(ARCH))
 endif
@@ -63,7 +71,8 @@ DNSMASQ_SHA256 := 0228c0364a7f2356fd7e7f1549937cbf3099a78d3b2eb1ba5bb0c31e2b89de
 DNSMASQ_ARCHIVE := $(OUTPUT_DIR)/dnsmasq.tar.xz
 
 MULTIARCH_CONTAINER := multiarch/qemu-user-static:register
-MULTIARCH_RELEASE := https://github.com/multiarch/qemu-user-static/releases/download/v5.2.0-11/x86_64_qemu-$(QEMUARCH)-static.tar.gz
+#MULTIARCH_RELEASE := https://github.com/multiarch/qemu-user-static/releases/download/v5.2.0-11/x86_64_qemu-$(QEMUARCH)-static.tar.gz
+MULTIARCH_RELEASE := https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-loongarch64-static.tar.gz
 
 PATCHES := $(shell find patches/ -name *.patch)
 BINARY := $(OUTPUT_DIR)/docker/dnsmasq
@@ -140,9 +149,9 @@ else
 		&& sed -i- "s/__CROSS_BUILD_COPY__/COPY/g" Dockerfile && rm Dockerfile-
 	@cd $(OUTPUT_DIR)/docker \
 		&& curl -sSL $(MULTIARCH_RELEASE) | tar -xz
-	@docker run --sig-proxy=true --rm      \
-		--privileged $(MULTIARCH_CONTAINER)  \
-		--reset $(VERBOSE_OUTPUT)
+#	@docker run --sig-proxy=true --rm      \
+#		--privileged $(MULTIARCH_CONTAINER)  \
+#		--reset $(VERBOSE_OUTPUT)
 	@docker pull $(COMPILE_IMAGE)
 	@docker run --rm --sig-proxy=true \
 		-v `pwd`/$(OUTPUT_DIR):/build   \

@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ARG_FROM_IPT
-ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
+#FROM ARG_FROM_IPT
+FROM lcr.loongnix.cn/k8s-build-image/debian-iptables:buster-v1.3.0
+#ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
+ADD .go/bin/node-cache /node-cache
 EXPOSE 53 53/udp
 EXPOSE 53 53/tcp
-ENTRYPOINT ["/ARG_BIN"]
+ENTRYPOINT ["/node-cache"]

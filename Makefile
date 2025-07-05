@@ -20,27 +20,27 @@
 PKG := k8s.io/dns
 
 # List of binaries to build.
-BINARIES := \
+#BINARIES := \
     e2e \
     ginkgo \
     sidecar-e2e
-
+BINARIES := node-cache
 # List of binaries to build that are containerized and pushed.
 # You must have a matching Dockerfile.BINARY for each BINARY.
-CONTAINER_BINARIES := \
+#CONTAINER_BINARIES := \
     dnsmasq-nanny \
     kube-dns \
     node-cache \
     sidecar
-
+CONTAINER_BINARIES := node-cache
 # List of images to build (contained in images/)
 IMAGES := dnsmasq
 # Registry to push to.
-REGISTRY ?= gcr.io/k8s-staging-dns
+REGISTRY ?= lcr.loongnix.cn/k8s-staging-dns
 # Default architecture to build for.
-ARCH ?= amd64
+ARCH ?= loong64
 # Image to use for building.
-BUILD_IMAGE ?= golang:1.18-bullseye
+BUILD_IMAGE ?= lcr.loongnix.cn/library/golang:1.24-trixie
 # Containers will be named: $(CONTAINER_PREFIX)-$(BINARY)-$(ARCH):$(VERSION)
 CONTAINER_PREFIX ?= k8s-dns
 # Caching for go builds, disabled for CI
@@ -56,5 +56,5 @@ include rules.mk
 
 # Additional rule to ensure that the dnsmasq image is built before the
 # dnsmasq-nanny image.
-BINARY := dnsmasq-nanny
-.$(BUILDSTAMP_NAME)-container: images-containers
+#BINARY := dnsmasq-nanny
+#.$(BUILDSTAMP_NAME)-container: images-containers

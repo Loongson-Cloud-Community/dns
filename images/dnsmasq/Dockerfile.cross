@@ -18,7 +18,6 @@ FROM __BASEIMAGE__
 # CROSS_BUILD_ placeholder is removed so e.g. CROSS_BUILD_COPY turns
 # into COPY. If we're building normally, for amd64, CROSS_BUILD lines
 # are removed
-__CROSS_BUILD_COPY__ qemu-__ARCH__-static /usr/bin/
 
 COPY dnsmasq.conf /etc/dnsmasq.conf
 COPY dnsmasq /usr/sbin/dnsmasq
